@@ -1,5 +1,5 @@
-using CafeShades.Extensions;
-using CafeShades.Middlewares;
+using Cafeshades.Extensions;
+using Cafeshades.Middlewares;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;

@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using System.Text.Json;
-using CafeShades.Models;
+using Cafeshades.Models;
 
-namespace CafeShades.Middlewares
+namespace Cafeshades.Middlewares
 {
     public class ExceptionMiddleware
     {

@@ -1,5 +1,5 @@
 ﻿#nullable disable
-namespace CafeShades.Models.Dtos
+namespace Cafeshades.Models.Dtos
 {
     public class ProductDto
     {

@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using AutoMapper.Execution;
-using CafeShades.Models.Dtos;
+using Cafeshades.Models.Dtos;
 using Core.Entities;
 
-namespace CafeShades.Helper
+namespace Cafeshades.Helper
 {
     public class ProductTotalResolver : IValueResolver<Product, ProductDto, int>
     {

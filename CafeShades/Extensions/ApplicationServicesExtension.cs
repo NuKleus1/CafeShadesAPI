@@ -1,10 +1,10 @@
-﻿using CafeShades.Helper;
+﻿using Cafeshades.Helper;
 using Core.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Data.Repository;
 using Microsoft.EntityFrameworkCore;
 
-namespace CafeShades.Extensions
+namespace Cafeshades.Extensions
 {
     public static class ApplicationServicesExtension
     {

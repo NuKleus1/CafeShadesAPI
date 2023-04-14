@@ -1,12 +1,12 @@
 ﻿using Core.Entities;
 
-namespace CafeShades.Models.Dtos
+namespace Cafeshades.Models.Dtos
 {
     public class MenuDto : ApiResponse
     {
-        public List<CategoryDto> CategoryList { get; set; }
+        public IReadOnlyList<CategoryDto> CategoryList { get; set; }
 
-        public MenuDto(List<CategoryDto> categoryList) : base(true) 
+        public MenuDto(IReadOnlyList<CategoryDto> categoryList) : base(true) 
         {
             CategoryList = categoryList;
         }

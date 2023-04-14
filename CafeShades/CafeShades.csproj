@@ -21,4 +21,10 @@
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwRoot\common\" />
+    <Folder Include="wwwRoot\Category\" />
+    <Folder Include="wwwRoot\Product\" />
+  </ItemGroup>
+
 </Project>

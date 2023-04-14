@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using CafeShades.Models;
-using CafeShades.Models.Dtos;
+using Cafeshades.Models;
+using Cafeshades.Models.Dtos;
 using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.Data.Repository;
@@ -9,16 +9,18 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace CafeShades.Controllers
 {
-    [Route("api/[controller]")]
+    // TODO : Implement Add and Update Requests for Image Handling
+    // TODO : Patch for Qauntity
+    [Route("api/product")]
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly ICategoryRepository _categoryRepository;
+        private readonly IGenericRepository<Category> _categoryRepository;
         private readonly IMapper _mapper;
         private readonly IGenericRepository<Product> _productRepo;
         private readonly ILogger<ProductController> _logger;
 
-        public ProductController(ICategoryRepository categoryRepository, IMapper mapper, IGenericRepository<Product> productRepo, ILogger<ProductController> logger)
+        public ProductController(IGenericRepository<Category> categoryRepository, IMapper mapper, IGenericRepository<Product> productRepo, ILogger<ProductController> logger)
         {
             _categoryRepository = categoryRepository;
             _mapper = mapper;
@@ -29,12 +31,12 @@ namespace CafeShades.Controllers
         [HttpGet("getMenu")]
         public async Task<IActionResult> GetMenu()
         {
-            var categoryWithProducts = await _categoryRepository.GetAllWithProducts();
+            var categoryWithProducts = await _categoryRepository.ListAllAsync(cat => cat.Products);
 
             if (categoryWithProducts.IsNullOrEmpty())
                 return NotFound(new ErrorResponse("Menu Not found!"));
 
-            var data = _mapper.Map<List<Category>, List<CategoryDto>>(categoryWithProducts);
+            var data = _mapper.Map<IReadOnlyList<Category>, IReadOnlyList<CategoryDto>>(categoryWithProducts);
 
             return Ok(new MenuDto(data));
         }
@@ -46,34 +48,40 @@ namespace CafeShades.Controllers
             try
             {
                 product = await _productRepo.GetByIdAsync(id);
+
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error Occured while GetBYID Product");
                 return BadRequest();
             }
-            var productDto = _mapper.Map<ProductDto>(product);
-            return Ok(productDto);
+
+            if (product == null) return NotFound();
+
+            return Ok(_mapper.Map<ProductDto>(product));
         }
 
-        [HttpGet("getAll")]
+        [HttpGet()]
         public async Task<IActionResult> GetAll()
         {
             IEnumerable<Product> products;
             try
             {
                 products = await _productRepo.ListAllAsync();
+
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error Occured while GetAll Product");
                 return BadRequest(ex);
             }
-            var productDto = _mapper.Map<IEnumerable<ProductDto>>(products);
-            return Ok(productDto);
+
+            if (products.IsNullOrEmpty()) return NotFound();
+
+            return Ok(_mapper.Map<IEnumerable<ProductDto>>(products));
         }
 
-        [HttpPost("add")]
+        [HttpPost()]
         public async Task<IActionResult> AddProduct([FromBody] ProductDto productDto)
         {
             var product = _mapper.Map<Product>(productDto);
@@ -91,13 +99,16 @@ namespace CafeShades.Controllers
             return Ok();
         }
 
-        [HttpDelete("delete")]
-        public async Task<IActionResult> DeleteProduct([FromBody] ProductDto productDto)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(int id)
         {
-            var product = _mapper.Map<Product>(productDto);
             try
             {
-                _productRepo.Delete(product);
+                var record = await _productRepo.GetByIdAsync(id);
+
+                if (record == null) return NotFound();
+
+                _productRepo.Delete(record);
                 _productRepo.SaveChanges();
             }
             catch (Exception ex)
@@ -108,14 +119,18 @@ namespace CafeShades.Controllers
             return Ok();
         }
 
-        [HttpPut("update")]
-        public async Task<IActionResult> PutProduct([FromBody]ProductDto productDto)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutProduct(int id, [FromBody]ProductDto productDto)
         {
             var product = _mapper.Map<Product>(productDto);
             try
             {
-                _productRepo.SaveChanges();
+                var pro = await _productRepo.GetByIdAsync(id);
+
+                if (pro == null) return NotFound();
+
                 _productRepo.Delete(product);
+                _productRepo.SaveChanges();
             }
             catch (Exception ex)
             {

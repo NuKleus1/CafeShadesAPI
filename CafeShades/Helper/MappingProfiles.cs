@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using CafeShades.Models.Dtos;
+using Cafeshades.Models.Dtos;
 using Core.Entities;
 
-namespace CafeShades.Helper
+namespace Cafeshades.Helper
 {
     public class MappingProfiles : Profile
     {

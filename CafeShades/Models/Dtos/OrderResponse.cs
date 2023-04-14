@@ -1,4 +1,4 @@
-﻿namespace CafeShades.Models.Dtos
+﻿namespace Cafeshades.Models.Dtos
 {
     public class OrderResponse :ApiResponse
     {
