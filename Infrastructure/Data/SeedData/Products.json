@@ -1,0 +1,44 @@
+[
+  {
+    "Name": "Pavbhaji",
+    "ImageUrl": "image",
+    "Price": 120,
+    "Quanity": 10,
+    "CategoryId": 1
+  },
+  {
+    "Name": "Pavbhaji",
+    "ImageUrl": "image",
+    "Price": 120,
+    "Quanity": 10,
+    "CategoryId": 1
+  },
+  {
+    "Name": "Pavbhaji",
+    "ImageUrl": "image",
+    "Price": 120,
+    "Quanity": 10,
+    "CategoryId": 3
+  },
+  {
+    "Name": "Pavbhaji",
+    "ImageUrl": "image",
+    "Price": 120,
+    "Quanity": 10,
+    "CategoryId": 2
+  },
+  {
+    "Name": "Pavbhaji",
+    "ImageUrl": "image",
+    "Price": 120,
+    "Quanity": 10,
+    "CategoryId": 2
+  },
+  {
+    "Name": "Pavbhaji",
+    "ImageUrl": "image",
+    "Price": 120,
+    "Quanity": 10,
+    "CategoryId": 1
+  }
+]
