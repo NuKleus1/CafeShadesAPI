@@ -1,4 +1,5 @@
-﻿using Core.Entities;
+﻿using CafeShades.Models;
+using Core.Entities;
 
 namespace Cafeshades.Models.Dtos
 {

@@ -69,6 +69,11 @@ namespace Infrastructure.Data.Repository
 
         public async void Add(T entity)
         {
+            _context.Set<T>().Add(entity);
+        }
+
+        public async void AddAsync(T entity)
+        {
             await _context.Set<T>().AddAsync(entity);
         }
         public void AddList(IEnumerable<T> entities)

@@ -5,6 +5,10 @@ using Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Data;
+using System.Net.Mime;
+using System.Runtime.CompilerServices;
+using static System.Net.Mime.MediaTypeNames;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -16,14 +20,20 @@ namespace CafeShades.Controllers
     public class CategoryController : ControllerBase
     {
         private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _env;
         private readonly IGenericRepository<Category> _categoryRepo;
         private readonly ILogger<CategoryController> _logger;
 
-        public CategoryController(IMapper mapper, IGenericRepository<Category> productRepo, ILogger<CategoryController> logger)
+        public CategoryController(
+            IMapper mapper,
+            IGenericRepository<Category> productRepo,
+            ILogger<CategoryController> logger,
+            IWebHostEnvironment env)
         {
             _mapper = mapper;
             _categoryRepo = productRepo;
             _logger = logger;
+            _env = env;
         }
 
 
@@ -34,7 +44,7 @@ namespace CafeShades.Controllers
             Category record;
             try
             {
-                record = await _categoryRepo.GetByIdAsync(id, includeExpression:null);
+                record = await _categoryRepo.GetByIdAsync(id, includeExpression: null);
             }
             catch (Exception ex)
             {
@@ -69,18 +79,106 @@ namespace CafeShades.Controllers
 
         // POST api/<CategoryController>
         [HttpPost()]
-        public void AddCategory([FromBody] string categoryName, [FromForm] IFormFile imageFile)
+        public IActionResult AddCategory([FromBody] string categoryName, [FromForm] IFormFile imageFile)
         {
-            Category category = new Category();
-            category.Name = categoryName;
 
-            _categoryRepo.Add(category);
+            if (imageFile == null || imageFile.Length <= 0)
+                return BadRequest("No image file was provided.");
+
+            string fileName;
+            
+            try
+            {
+                fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+
+                string filePath = Path.Combine(_env.WebRootPath, "Category", fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                    imageFile.CopyTo(stream);
+
+            }catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while saving Image");
+                return BadRequest();
+            }
+
+            // Update the category with the file name
+            // ...
+            try
+            {
+                Category category = new Category();
+                category.Name = categoryName;
+                category.ImageUrl = fileName;
+
+                _categoryRepo.AddAsync(category);
+            }catch(DBConcurrencyException ex)
+            {
+                _logger.LogError(ex, "Id Error");
+                return BadRequest("Id Error");
+            }catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unkown Error");
+                return BadRequest();
+            }
+
+            return Ok();
         }
+
 
         // PUT api/<CategoryController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCategory(int id, [FromBody] string categoryName, [FromForm] IFormFile imageFile)
         {
+            if (imageFile == null || imageFile.Length <= 0)
+                return BadRequest("No image file was provided.");
+
+            var cat = await _categoryRepo.GetByIdAsync(id);
+
+            if (cat == null)
+                return NotFound("Category Not found with Id : " + id);
+
+            string oldImagePath = Path.Combine(_env.WebRootPath, "Category", cat.ImageUrl);
+
+            string newImageFileName;
+            string newImageFilePath;
+
+            try
+            {
+                newImageFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+
+                newImageFilePath = Path.Combine(_env.WebRootPath, "Category", newImageFileName);
+
+                using (var stream = new FileStream(newImageFilePath, FileMode.Create))
+                    imageFile.CopyTo(stream);
+
+            }catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while saving Image");
+                return BadRequest();
+            }
+
+            try
+            {
+                Category category = new Category();
+                category.Id = id;
+                category.Name = categoryName;
+                category.ImageUrl = newImageFileName;
+
+                _categoryRepo.Update(category);
+                _categoryRepo.SaveChanges();
+
+                System.IO.File.Replace(oldImagePath, newImageFilePath, category.Id+"_"+categoryName);
+
+            }catch (DBConcurrencyException ex)
+            {
+                _logger.LogError(ex, "Id Error");
+                return BadRequest("Id Error");
+            }catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unkown Error");
+                return BadRequest();
+            }
+
             return Ok();
         }
 

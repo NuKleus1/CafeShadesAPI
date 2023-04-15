@@ -1,6 +1,8 @@
-﻿namespace Cafeshades.Models
+﻿using CafeShades.Models;
+
+namespace Cafeshades.Models
 {
-    public class ErrorResponse:ApiResponse
+    public class ErrorResponse : ApiResponse
     {
         public string responseMessage { get; set; }
 

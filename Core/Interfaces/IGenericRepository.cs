@@ -27,5 +27,6 @@ namespace Core.Interfaces
         Task<IReadOnlyList<T>> ListAllAsync(Expression<Func<T, object>> includeExpression);
         Task<IReadOnlyList<T>> ListAllAsync(Expression<Func<T, bool>> criteria);
         Task<IReadOnlyList<T>> ListAllAsync();
+        void AddAsync(T entity);
     }
 }

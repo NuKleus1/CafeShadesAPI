@@ -1,4 +1,6 @@
-﻿namespace Cafeshades.Models
+﻿using CafeShades.Models;
+
+namespace Cafeshades.Models
 {
     public class ApiException : ApiResponse
     {

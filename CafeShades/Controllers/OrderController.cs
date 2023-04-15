@@ -16,16 +16,22 @@ namespace CafeShades.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _env;
         private readonly IGenericRepository<Order> _orderRepo;
         private readonly IGenericRepository<OrderStatus> _orderStatusRepo;
         private readonly ILogger<OrderController> _logger;
 
-        public OrderController(IMapper mapper, IGenericRepository<Order> orderRepo, IGenericRepository<OrderStatus> orderStatusRepo, ILogger<OrderController> logger)
+        public OrderController(IMapper mapper,
+                               IGenericRepository<Order> orderRepo,
+                               IGenericRepository<OrderStatus> orderStatusRepo,
+                               ILogger<OrderController> logger,
+            IWebHostEnvironment env)
         {
             _mapper = mapper;
             _orderRepo = orderRepo;
             _orderStatusRepo = orderStatusRepo;
             _logger = logger;
+            _env = env;
         }
 
         #region Order
@@ -163,7 +169,7 @@ namespace CafeShades.Controllers
             {
                 var allstatus = await _orderStatusRepo.ListAllAsync();
                 foreach (var item in allstatus)
-                    if(item.StatusName.Equals(orderStatusName))
+                    if (item.StatusName.Equals(orderStatusName))
                         return Conflict();
 
                 _orderStatusRepo.Add(status);
