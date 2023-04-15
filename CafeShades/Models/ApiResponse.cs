@@ -3,14 +3,22 @@
     public class ApiResponse
     {
         public bool responseStatus { get; set; } = false;
-        public ApiResponse(bool _responseStatus)
+        public string responseMessage { get; set; }
+
+        public ApiResponse(string responseMessage)
         {
-            responseStatus = _responseStatus;
+            this.responseMessage = responseMessage;
+        }
+
+        public ApiResponse(bool responseStatus, string responseMessage)
+        {
+            this.responseMessage = responseMessage;
+            this.responseStatus = responseStatus;
+
         }
         public ApiResponse()
         {
             
         }
-
     }
 }

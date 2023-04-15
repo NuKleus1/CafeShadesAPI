@@ -9,7 +9,5 @@ namespace Core.Entities
     public class OrderStatus :BaseEntity
     {
         public string StatusName { get; set; }
-
-        
     }
 }

@@ -1,0 +1,84 @@
+[
+  {
+    "UserId": 1,
+    "OrderStatusId": 1,
+    "Date": "2023-04-15T10:15:00.000Z",
+    "TotalAmount": 1500,
+    "CreatedAt": "2023-04-15T10:15:00.000Z",
+    "ModifiedAt": "2023-04-15T10:15:00.000Z",
+    "OrderItems": [
+      {
+        "ProductId": 1,
+        "Quantity": 2
+      },
+      {
+        "ProductId": 2,
+        "Quantity": 1
+      }
+    ]
+  },
+  {
+    "UserId": 2,
+    "OrderStatusId": 2,
+    "Date": "2023-04-14T08:30:00.000Z",
+    "TotalAmount": 750,
+    "CreatedAt": "2023-04-14T08:30:00.000Z",
+    "ModifiedAt": "2023-04-14T08:30:00.000Z",
+    "OrderItems": [
+      {
+        "ProductId": 3,
+        "Quantity": 1
+      },
+      {
+        "ProductId": 4,
+        "Quantity": 3
+      }
+    ]
+  },
+  {
+    "UserId": 3,
+    "OrderStatusId": 3,
+    "Date": "2023-04-13T15:45:00.000Z",
+    "TotalAmount": 600,
+    "CreatedAt": "2023-04-13T15:45:00.000Z",
+    "ModifiedAt": "2023-04-13T15:45:00.000Z",
+    "OrderItems": [
+      {
+        "ProductId": 5,
+        "Quantity": 2
+      },
+      {
+        "ProductId": 6,
+        "Quantity": 1
+      }
+    ]
+  },
+  {
+    "UserId": 1,
+    "OrderStatusId": 1,
+    "Date": "2023-04-12T11:00:00.000Z",
+    "TotalAmount": 1050,
+    "CreatedAt": "2023-04-12T11:00:00.000Z",
+    "ModifiedAt": "2023-04-12T11:00:00.000Z",
+    "OrderItems": [
+      {
+        "ProductId": 7,
+        "Quantity": 3
+      }
+    ]
+  },
+  {
+    "UserId": 2,
+    "OrderStatusId": 2,
+    "Date": "2023-04-11T19:20:00.000Z",
+    "TotalAmount": 500,
+    "CreatedAt": "2023-04-11T19:20:00.000Z",
+    "ModifiedAt": "2023-04-11T19:20:00.000Z",
+    "OrderItems": [
+      {
+        "ProductId": 8,
+        "Quantity": 2
+      }
+    ]
+  }
+]

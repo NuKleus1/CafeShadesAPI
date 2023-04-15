@@ -18,6 +18,7 @@ namespace Infrastructure.Data.Repository
         }
 
         #region GetById
+
         public async Task<T> GetByIdAsync(int id, List<Expression<Func<T, object>>> includeExpressions, Expression<Func<T, bool>> criteria)
         {
             return await ApplySpecs(id, includeExpressions, criteria: criteria).FirstOrDefaultAsync();
@@ -67,7 +68,7 @@ namespace Infrastructure.Data.Repository
         }
         #endregion
 
-        public async void Add(T entity)
+        public void Add(T entity)
         {
             _context.Set<T>().Add(entity);
         }
@@ -93,6 +94,11 @@ namespace Infrastructure.Data.Repository
             _context.SaveChanges();
         }
 
+        public async void SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
 
         private IQueryable<T> ApplySpecs(int? id = null, List<Expression<Func<T, object>>>? includeExpressions = null, Expression<Func<T, object>>? includeExpression = null, Expression<Func<T, bool>>? criteria = null)
         {
@@ -111,6 +117,8 @@ namespace Infrastructure.Data.Repository
 
             return query;
         }
+
+
 
     }
 }

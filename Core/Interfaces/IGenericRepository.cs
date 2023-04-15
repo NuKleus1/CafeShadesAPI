@@ -21,12 +21,14 @@ namespace Core.Interfaces
         Task<T> GetByIdAsync(int id, Expression<Func<T, object>> includeExpression, Expression<Func<T, bool>> criteria);
         Task<T> GetByIdAsync(int id, Expression<Func<T, object>> includeExpression);
         Task<T> GetByIdAsync(int id);
+        //T GetById(int id);
         Task<IReadOnlyList<T>> ListAllAsync(List<Expression<Func<T, object>>> includeExpressions, Expression<Func<T, bool>> criteria);
         Task<IReadOnlyList<T>> ListAllAsync(List<Expression<Func<T, object>>> includeExpressions);
         Task<IReadOnlyList<T>> ListAllAsync(Expression<Func<T, object>> includeExpression, Expression<Func<T, bool>> criteria);
         Task<IReadOnlyList<T>> ListAllAsync(Expression<Func<T, object>> includeExpression);
         Task<IReadOnlyList<T>> ListAllAsync(Expression<Func<T, bool>> criteria);
         Task<IReadOnlyList<T>> ListAllAsync();
-        void AddAsync(T entity);
+        //void AddAsync(T entity);
+        //void SaveChangesAsync();
     }
 }

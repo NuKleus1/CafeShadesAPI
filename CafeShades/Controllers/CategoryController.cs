@@ -1,20 +1,17 @@
 ﻿using AutoMapper;
 using Cafeshades.Models.Dtos;
+using Cafeshades.Models.Request;
 using Core.Entities;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Data;
-using System.Net.Mime;
-using System.Runtime.CompilerServices;
-using static System.Net.Mime.MediaTypeNames;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace CafeShades.Controllers
 {
-    // TODO : Implement Add and Update Requests
+    // TODO : Change Responses into ApiResponse Format
     [Route("api/[controller]")]
     [ApiController]
     public class CategoryController : ControllerBase
@@ -44,17 +41,17 @@ namespace CafeShades.Controllers
             Category record;
             try
             {
-                record = await _categoryRepo.GetByIdAsync(id, includeExpression: null);
+                record = await _categoryRepo.GetByIdAsync(id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error Occured while Deleting Product");
-                return BadRequest();
+                _logger.LogError(ex, $"Error Occurred while Retrieving CAtegory with Id : {id}");
+                return BadRequest(new { responseStatus = false, responseMessage = "Error Occurred" });
             }
 
-            if (record == null) return NotFound();
+            if (record == null) return NotFound(new { responseStatus = false, responseMessage = "Not Found!" });
 
-            return Ok(_mapper.Map<CategoryDto>(record));
+            return Ok(new { responseStatus = true, category = _mapper.Map<CategoryDto>(record) });
         }
 
         // GET api/<CategoryController>
@@ -68,74 +65,77 @@ namespace CafeShades.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error Occured while Deleting Product");
-                return BadRequest();
+                _logger.LogError(ex, "Error Occurred while Retrieving Product");
+                return BadRequest(new { responseStatus = false, responseMessage = "Serverside Error Occurred" });
             }
 
-            if (record.IsNullOrEmpty()) return NotFound();
+            if (record.IsNullOrEmpty()) return NotFound(new { responseStatus = false, responseMessage = "No Category Found!" });
 
-            return Ok(_mapper.Map<IEnumerable<CategoryDto>>(record));
+            return Ok(new { responseStatus = true, categoryList = _mapper.Map<IEnumerable<CategoryDto>>(record) });
         }
 
         // POST api/<CategoryController>
         [HttpPost()]
-        public IActionResult AddCategory([FromBody] string categoryName, [FromForm] IFormFile imageFile)
+        public IActionResult AddCategory([FromForm] CategoryRequest category)
         {
 
-            if (imageFile == null || imageFile.Length <= 0)
-                return BadRequest("No image file was provided.");
+            if (category.ImageFile == null || category.ImageFile.Length <= 0)
+                return BadRequest(new { responseStatus = false, responseMessage = "No image file was provided." });
 
             string fileName;
-            
+
             try
             {
-                fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+                fileName = Guid.NewGuid().ToString() + Path.GetExtension(category.ImageFile.FileName);
 
                 string filePath = Path.Combine(_env.WebRootPath, "Category", fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
-                    imageFile.CopyTo(stream);
+                    category.ImageFile.CopyTo(stream);
 
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while saving Image");
-                return BadRequest();
+                return BadRequest(new { responseStatus = false, responseMessage = "Error While saving Image!" });
             }
 
             // Update the category with the file name
             // ...
             try
             {
-                Category category = new Category();
-                category.Name = categoryName;
-                category.ImageUrl = fileName;
+                Category newCategory = new Category();
+                newCategory.Name = category.CategoryName;
+                newCategory.ImageUrl = fileName;
 
-                _categoryRepo.AddAsync(category);
-            }catch(DBConcurrencyException ex)
+                _categoryRepo.Add(newCategory);
+                _categoryRepo.SaveChanges();
+            }
+            catch (DBConcurrencyException ex)
             {
                 _logger.LogError(ex, "Id Error");
-                return BadRequest("Id Error");
-            }catch (Exception ex)
+                return BadRequest(new { responseStatus = false, responseMessage = "Error Occurred" });
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Unkown Error");
-                return BadRequest();
+                return BadRequest(new { responseStatus = false, responseMessage = "Unkown Server Error Occurred" });
             }
 
-            return Ok();
+            return Ok(new { responseStatus = true, responseMessage = "Category Added!" });
         }
-
 
         // PUT api/<CategoryController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, [FromBody] string categoryName, [FromForm] IFormFile imageFile)
+        public async Task<IActionResult> PutCategory(int id, [FromForm] CategoryRequest category)
         {
-            if (imageFile == null || imageFile.Length <= 0)
-                return BadRequest("No image file was provided.");
+            if (category.ImageFile == null || category.ImageFile.Length <= 0)
+                return BadRequest(new { responseStatus = false, responseMessage = "No image file was provided." });
 
             var cat = await _categoryRepo.GetByIdAsync(id);
 
             if (cat == null)
-                return NotFound("Category Not found with Id : " + id);
+                return NotFound(new { responseStatus = false, responseMessage = "Category Not found with Id : " + id });
 
             string oldImagePath = Path.Combine(_env.WebRootPath, "Category", cat.ImageUrl);
 
@@ -144,42 +144,49 @@ namespace CafeShades.Controllers
 
             try
             {
-                newImageFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+                newImageFileName = Guid.NewGuid().ToString() + Path.GetExtension(category.ImageFile.FileName);
 
                 newImageFilePath = Path.Combine(_env.WebRootPath, "Category", newImageFileName);
 
                 using (var stream = new FileStream(newImageFilePath, FileMode.Create))
-                    imageFile.CopyTo(stream);
+                    category.ImageFile.CopyTo(stream);
 
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while saving Image");
-                return BadRequest();
+                return BadRequest(new { responseStatus = false, responseMessage = "Error Occurred" });
             }
 
             try
             {
-                Category category = new Category();
-                category.Id = id;
-                category.Name = categoryName;
-                category.ImageUrl = newImageFileName;
+                Category newCategory = new Category();
+                newCategory.Id = id;
+                newCategory.Name = category.CategoryName;
+                newCategory.ImageUrl = newImageFileName;
 
-                _categoryRepo.Update(category);
+                _categoryRepo.Update(newCategory);
                 _categoryRepo.SaveChanges();
 
-                System.IO.File.Replace(oldImagePath, newImageFilePath, category.Id+"_"+categoryName);
+                System.IO.File.Replace(oldImagePath, newImageFilePath, newCategory.Id + "_" + category.CategoryName);
 
-            }catch (DBConcurrencyException ex)
+            }
+            catch (DBConcurrencyException ex)
             {
                 _logger.LogError(ex, "Id Error");
-                return BadRequest("Id Error");
-            }catch (Exception ex)
+                return BadRequest(new { responseStatus = false, responseMessage = "Error Occurred" });
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Unkown Error");
-                return BadRequest();
+                return BadRequest(new { responseStatus = false, responseMessage = "Unkown Server Error Occurred" });
             }
 
-            return Ok();
+            return Ok(new
+            {
+                responseStatus = true,
+                responseMessage = "Category Updated!"
+            });
         }
 
         // DELETE api/<CategoryController>/5
@@ -190,17 +197,17 @@ namespace CafeShades.Controllers
             {
                 var record = await _categoryRepo.GetByIdAsync(id);
 
-                if (record == null) return NotFound();
+                if (record == null) return NotFound(new { responseStatus = false, responseMessage = "Category Not Found!" });
 
                 _categoryRepo.Delete(record);
                 _categoryRepo.SaveChanges();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error Occured while Deleting Product");
-                return BadRequest();
+                _logger.LogError(ex, "Error Occurred while Deleting Product");
+                return BadRequest(new { responseStatus = false, responseMessage = "Unkown Server Error Occurred" });
             }
-            return Ok();
+            return Ok(new { responseStatus = true, responseMessage = "Category Deleted!" });
         }
 
 

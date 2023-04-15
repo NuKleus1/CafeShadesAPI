@@ -1,0 +1,52 @@
+[
+  {
+    "Name": "John Doe",
+    "BuildingName": "ABC Building",
+    "FloorNumber": "2nd",
+    "OfficeNumber": "204",
+    "Landmark": "Near XYZ Park",
+    "MobileNumber": "1234567890",
+    "LastLoginAt": "2023-04-15T10:00:00Z",
+    "isLoggedIn": false
+  },
+  {
+    "Name": "Jane Doe",
+    "BuildingName": "XYZ Building",
+    "FloorNumber": "1st",
+    "OfficeNumber": "102",
+    "Landmark": "Near ABC Park",
+    "MobileNumber": "0987654321",
+    "LastLoginAt": "2023-04-14T14:30:00Z",
+    "isLoggedIn": false
+  },
+  {
+    "Name": "Bob Smith",
+    "BuildingName": "MNO Building",
+    "FloorNumber": "3rd",
+    "OfficeNumber": "301",
+    "Landmark": "Near PQR Park",
+    "MobileNumber": "9876543210",
+    "LastLoginAt": "2023-04-13T09:15:00Z",
+    "isLoggedIn": false
+  },
+  {
+    "Name": "Alice Johnson",
+    "BuildingName": "PQR Building",
+    "FloorNumber": "2nd",
+    "OfficeNumber": "204",
+    "Landmark": "Near MNO Park",
+    "MobileNumber": "0123456789",
+    "LastLoginAt": "2023-04-12T16:45:00Z",
+    "isLoggedIn": false
+  },
+  {
+    "Name": "Tom Williams",
+    "BuildingName": "GHI Building",
+    "FloorNumber": "1st",
+    "OfficeNumber": "101",
+    "Landmark": "Near JKL Park",
+    "MobileNumber": "6789012345",
+    "LastLoginAt": "2023-04-11T11:30:00Z",
+    "isLoggedIn": false
+  }
+]
