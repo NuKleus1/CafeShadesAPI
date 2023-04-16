@@ -9,10 +9,6 @@ namespace CafeShades.Models.Request
         [Required]
         public int UserId { get; set; }
         [Required]
-        public int OrderStatusId { get; set; }
-        public int TotalAmount { get; set; }
-        [Required]
-        [FromForm]
         public List<OrderItemRequest> OrderItems { get; set; }
     }
 }

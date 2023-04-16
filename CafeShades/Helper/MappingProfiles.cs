@@ -27,7 +27,9 @@ namespace Cafeshades.Helper
                 .ForMember(dest => dest.productImage, o => o.MapFrom<ProductImageUrlFromOrderItem>())
                 .ForMember(dest => dest.productCategoryId, o => o.MapFrom(src => src.Product.CategoryId))
                 .ForMember(dest => dest.productCategory, o => o.MapFrom(src => src.Product.Category.Name))
-                .ForMember(dest => dest.total, o => o.MapFrom(src => src.Quantity * src.Product.Price));
+                .ForMember(dest => dest.total, o => o.MapFrom(src => src.Quantity * src.Product.Price))
+                .ReverseMap();
+
 
 
             CreateMap<Category, CategoryDto>()
@@ -41,7 +43,9 @@ namespace Cafeshades.Helper
                 .ForMember(dest => dest.orderStatus, opt => opt.MapFrom(src => src.OrderStatus.StatusName))
                 .ForMember(dest => dest.orderId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.orderDate, opt => opt.MapFrom(src => src.Date))
-                .ForMember(dest => dest.productList, opt => opt.MapFrom(src => src.OrderItems));
+                .ForMember(dest => dest.productList, opt => opt.MapFrom(src => src.OrderItems))
+                .ReverseMap();
+
 
             CreateMap<User, UserDto>()
                 .ForMember(dest => dest.userId, opt => opt.MapFrom(src => src.Id))

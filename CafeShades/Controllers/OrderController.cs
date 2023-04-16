@@ -71,10 +71,6 @@ namespace CafeShades.Controllers
                         await _context.Entry(item).Reference(oi => oi.Product).LoadAsync();
                     }
                 }
-
-
-                
-
             }
             catch (Exception ex)
             {
@@ -82,9 +78,37 @@ namespace CafeShades.Controllers
                 return BadRequest(new ApiResponse("Unknown Server Error Occured"));
             }
 
-
             return Ok(new { responseStatus = true, order = _mapper.Map<OrderDto>(record) });
 
+        }
+
+        [HttpGet("user/{id}")]
+        public async Task<IActionResult> GetAllByUser(int id)
+        {
+            IReadOnlyList<Order> record;
+            try
+            {
+                record = await _orderRepo.ListAllAsync(new List<Expression<Func<Order, object>>>
+                {
+                    or => or.OrderStatus,
+                    or => or.OrderItems,
+                }, or => or.UserId == id);
+
+                if (record.IsNullOrEmpty()) return NotFound(new ApiResponse("Orders Not Found!"));
+
+
+                foreach (var item in record)
+                    foreach (var orderItem in item.OrderItems)
+                        await _context.Entry(orderItem).Reference(oi => oi.Product).LoadAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Occurred while Retrieving Orders");
+                return BadRequest(new ApiResponse("Unknown Server Error Occured"));
+            }
+
+
+            return Ok(new { responseStatus = true, orderList = _mapper.Map<IReadOnlyList<OrderDto>>(record) });
         }
 
         // GET api/<OrderController>
@@ -126,20 +150,20 @@ namespace CafeShades.Controllers
         {
             try
             {
-                var status = await _orderStatusRepo.GetByIdAsync(orderRequest.OrderStatusId);
-                if (status == null)
-                    return BadRequest(new ApiResponse("Status does not Exists !"));
+                //var status = await _orderStatusRepo.GetByIdAsync(orderRequest.OrderStatusId);
+                //if (status == null)
+                //    return BadRequest(new ApiResponse("Status does not Exists !"));
 
                 User user = await _userRepo.GetByIdAsync(orderRequest.UserId);
                 if (user == null)
-                    return BadRequest(new ApiResponse("User does not Exists !"));
+                    return NotFound(new ApiResponse("User does not Exists !"));
 
                 foreach (var item in orderRequest.OrderItems)
                 {
                     var product = await _productRepo.GetByIdAsync(item.ProductId);
                     if (product == null)
-                        return BadRequest(new ApiResponse("Product : " + product.Name + " Not Found!"));
-                    if (! (product.Quantity >= item.Quantity))
+                        return NotFound(new ApiResponse("Product : " + product.Name + " Not Found!"));
+                    if (!(product.Quantity >= item.Quantity))
                         return BadRequest(new ApiResponse("Reduce Quantity for Product : " + product.Name));
                 }
             }
@@ -166,8 +190,6 @@ namespace CafeShades.Controllers
                     ProductId = item.ProductId,
                     Quantity = item.Quantity,
                 });
-
-
             try
             {
                 _orderRepo.Add(newOrder);
@@ -196,12 +218,12 @@ namespace CafeShades.Controllers
                     return NotFound(new ApiResponse("Order Not Found!"));
 
                 var status = await _orderStatusRepo.GetByIdAsync(orderRequest.OrderStatusId);
-                
+
                 if (status == null)
                     return BadRequest(new ApiResponse("Status does not Exists !"));
 
                 User user = await _userRepo.GetByIdAsync(orderRequest.UserId);
-                
+
                 if (user == null)
                     return BadRequest(new ApiResponse("User does not Exists !"));
 
@@ -211,7 +233,7 @@ namespace CafeShades.Controllers
                     if (product == null)
                         return BadRequest(new ApiResponse("Product : " + product.Name + " Not Found!"));
                     if (!(product.Quantity >= item.Quantity))
-                        return BadRequest(new ApiResponse("Reduce Quantity for Product : " + product.Name + " | by : " +  (item.Quantity - product.Quantity)));
+                        return BadRequest(new ApiResponse("Reduce Quantity for Product : " + product.Name + " | by : " + (item.Quantity - product.Quantity)));
                 }
             }
             catch (Exception ex)
