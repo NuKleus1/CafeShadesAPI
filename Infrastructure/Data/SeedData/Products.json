@@ -1,56 +1,56 @@
 [
   {
     "Name": "Burger",
-    "ImageUrl": "https://picsum.photos/200?random=1",
+    "ImageUrl": "Burger.png",
     "Price": 10,
     "Quantity": 1,
     "CategoryId": 1
   },
   {
     "Name": "Pizza",
-    "ImageUrl": "https://picsum.photos/200?random=2",
+    "ImageUrl": "Pizza.png",
     "Price": 15,
     "Quantity": 1,
     "CategoryId": 1
   },
   {
     "Name": "Pasta",
-    "ImageUrl": "https://picsum.photos/200?random=3",
+    "ImageUrl": "Pasta.png",
     "Price": 12,
     "Quantity": 1,
     "CategoryId": 1
   },
   {
     "Name": "Rice",
-    "ImageUrl": "https://picsum.photos/200?random=4",
+    "ImageUrl": "Rice.png",
     "Price": 8,
     "Quantity": 1,
     "CategoryId": 2
   },
   {
     "Name": "Noodles",
-    "ImageUrl": "https://picsum.photos/200?random=5",
+    "ImageUrl": "Noodles.png",
     "Price": 10,
     "Quantity": 1,
     "CategoryId": 2
   },
   {
     "Name": "Sandwich",
-    "ImageUrl": "https://picsum.photos/200?random=6",
+    "ImageUrl": "Sandwich.png",
     "Price": 6,
     "Quantity": 1,
     "CategoryId": 3
   },
   {
     "Name": "Hot Dog",
-    "ImageUrl": "https://picsum.photos/200?random=7",
+    "ImageUrl": "HotDog.png",
     "Price": 5,
     "Quantity": 1,
     "CategoryId": 3
   },
   {
     "Name": "French Fries",
-    "ImageUrl": "https://picsum.photos/200?random=8",
+    "ImageUrl": "FrenchFries.png",
     "Price": 3,
     "Quantity": 1,
     "CategoryId": 4

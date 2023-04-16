@@ -46,7 +46,7 @@ namespace CafeShades.Controllers
 
             var data = _mapper.Map<IReadOnlyList<Category>, IReadOnlyList<CategoryDto>>(categoryWithProducts);
 
-            return Ok(new {responseStatus = true, categorList = data});
+            return Ok(new {responseStatus = true, categoryList = data});
         }
 
         [HttpGet("{id}")]

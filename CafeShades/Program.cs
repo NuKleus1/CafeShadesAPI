@@ -25,7 +25,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+//server = DESKTOP - D5245NT\\SQLEXPRESS; database = StoreDb; Trusted_Connection = True; TrustServerCertificate = True
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();

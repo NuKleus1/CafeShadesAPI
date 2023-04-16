@@ -42,6 +42,16 @@ namespace Cafeshades.Helper
                 .ForMember(dest => dest.orderId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.orderDate, opt => opt.MapFrom(src => src.Date))
                 .ForMember(dest => dest.productList, opt => opt.MapFrom(src => src.OrderItems));
+
+            CreateMap<User, UserDto>()
+                .ForMember(dest => dest.userId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.buildingName, opt => opt.MapFrom(src => src.BuildingName))
+                .ForMember(dest => dest.floorNumber, opt => opt.MapFrom(src => src.FloorNumber))
+                .ForMember(dest => dest.landmark, opt => opt.MapFrom(src => src.Landmark))
+                .ForMember(dest => dest.mobileNumber, opt => opt.MapFrom(src => src.MobileNumber))
+                .ForMember(dest => dest.name, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.officeNumber, opt => opt.MapFrom(src => src.OfficeNumber))
+                .ReverseMap();
                 
         }
     }

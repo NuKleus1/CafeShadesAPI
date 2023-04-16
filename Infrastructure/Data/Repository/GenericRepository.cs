@@ -39,6 +39,12 @@ namespace Infrastructure.Data.Repository
         {
             return await ApplySpecs(id).FirstOrDefaultAsync();
         }
+
+        public async Task<T> GetByIdAsync(Expression<Func<T, bool>> criteria)
+        {
+            return await ApplySpecs(criteria: criteria).FirstOrDefaultAsync();
+        }
+
         #endregion
 
         #region GetByAll

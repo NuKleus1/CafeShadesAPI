@@ -1,18 +1,18 @@
 [
   {
     "Name": "Fast Food",
-    "ImageUrl": "https://picsum.photos/200?random=9"
+    "ImageUrl": "FastFood.png"
   },
   {
     "Name": "Rice",
-    "ImageUrl": "https://picsum.photos/200?random=10"
+    "ImageUrl": "Rice.png"
   },
   {
     "Name": "Snacks",
-    "ImageUrl": "https://picsum.photos/200?random=11"
+    "ImageUrl": "Snacks.png"
   },
   {
     "Name": "Sides",
-    "ImageUrl": "https://picsum.photos/200?random=12"
+    "ImageUrl": "Sides.png"
   }
 ]
