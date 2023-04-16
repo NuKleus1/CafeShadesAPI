@@ -10,7 +10,6 @@ namespace Core.Entities
         public int OrderStatusId { get; set; }
         public OrderStatus OrderStatus { get; set; }
         public DateTime Date { get; set; }
-        public int TotalAmount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime ModifiedAt { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; }

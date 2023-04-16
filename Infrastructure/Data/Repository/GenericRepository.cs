@@ -74,6 +74,10 @@ namespace Infrastructure.Data.Repository
         }
         #endregion
 
+        public T FirstOrDefault()
+        {
+            return  _context.Set<T>().FirstOrDefault();
+        }
         public void Add(T entity)
         {
             _context.Set<T>().Add(entity);

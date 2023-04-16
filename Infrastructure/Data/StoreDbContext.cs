@@ -11,7 +11,7 @@ namespace Infrastructure.Data
         }
 
         public DbSet<User> User { get; set; }
-        public DbSet<UserTokens> UserTokens { get; set; }
+        public DbSet<UserToken> UserTokens { get; set; }
         public DbSet<Product> Product { get; set; }
         public DbSet<Category> Category { get; set; }
         public DbSet<OrderStatus> OrderStatus { get; set; }

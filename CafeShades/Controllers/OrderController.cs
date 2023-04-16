@@ -175,11 +175,10 @@ namespace CafeShades.Controllers
 
             Order newOrder = new Order
             {
-                OrderStatusId = orderRequest.OrderStatusId,
+                OrderStatusId = _orderStatusRepo.FirstOrDefault()?.Id ?? 1,
                 UserId = orderRequest.UserId,
                 CreatedAt = DateTime.UtcNow,
                 Date = DateTime.UtcNow,
-                TotalAmount = orderRequest.TotalAmount,
             };
 
             newOrder.OrderItems = new List<OrderItem>();
@@ -206,7 +205,7 @@ namespace CafeShades.Controllers
 
         // PUT api/<OrderController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutOrder(int id, [FromBody] OrderRequest orderRequest)
+        public async Task<IActionResult> PutOrder(int id, [FromBody] OrderUpdateRequest orderRequest)
         {
             var oldOrder = new Order();
 
@@ -220,20 +219,22 @@ namespace CafeShades.Controllers
                 var status = await _orderStatusRepo.GetByIdAsync(orderRequest.OrderStatusId);
 
                 if (status == null)
-                    return BadRequest(new ApiResponse("Status does not Exists !"));
+                    return NotFound(new ApiResponse("Status does not Exists !"));
 
                 User user = await _userRepo.GetByIdAsync(orderRequest.UserId);
 
                 if (user == null)
-                    return BadRequest(new ApiResponse("User does not Exists !"));
+                    return NotFound(new ApiResponse("User does not Exists !"));
 
                 foreach (var item in orderRequest.OrderItems)
                 {
                     var product = await _productRepo.GetByIdAsync(item.ProductId);
+                    
                     if (product == null)
-                        return BadRequest(new ApiResponse("Product : " + product.Name + " Not Found!"));
-                    if (!(product.Quantity >= item.Quantity))
-                        return BadRequest(new ApiResponse("Reduce Quantity for Product : " + product.Name + " | by : " + (item.Quantity - product.Quantity)));
+                        return NotFound(new ApiResponse("Product : " + item + " Not Found!"));
+
+                    //if (!(product.Quantity >= item.Quantity))
+                    //    return NotFound(new ApiResponse("Reduce Quantity for Product : " + product.Name + " | by : " + (item.Quantity - product.Quantity)));
                 }
             }
             catch (Exception ex)
@@ -249,8 +250,7 @@ namespace CafeShades.Controllers
                 UserId = orderRequest.UserId,
                 ModifiedAt = DateTime.UtcNow,
                 CreatedAt = oldOrder.CreatedAt,
-                Date = oldOrder.Date,
-                TotalAmount = orderRequest.TotalAmount,
+                Date = oldOrder.Date
             };
 
             newOrder.OrderItems = new List<OrderItem>();
@@ -262,10 +262,9 @@ namespace CafeShades.Controllers
                     Quantity = item.Quantity,
                 });
 
-
             try
             {
-                _orderRepo.Add(newOrder);
+                _orderRepo.Update(newOrder);
                 _orderRepo.SaveChanges();
             }
             catch (Exception ex)
@@ -297,6 +296,18 @@ namespace CafeShades.Controllers
             }
             return Ok(new { responseStatus = true, responseMessage = "Order deleted successfully" });
         }
+
+        //[HttpPost("{id}/changeStatus")]
+        //public async Task<IActionResult> ChangeOrderStatus(int id, [FromBody] int orderStatusId)
+        //{
+        //    var oldOrder = await _orderRepo.GetByIdAsync(id);
+
+        //    if (oldOrder != null)
+        //        return NotFound(new ApiResponse("Order Not Found!"));
+
+
+        //    return Ok(new { responseStatus = true, responseMessage = "Order status changed successfully" });
+        //}
 
         #endregion
 
@@ -377,6 +388,7 @@ namespace CafeShades.Controllers
         {
             OrderStatus status = new OrderStatus
             {
+                Id = id,
                 StatusName = orderStatusName
             };
 

@@ -1,12 +1,11 @@
 ﻿using Core.Entities;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 
 namespace CafeShades.Models.Request
 {
-    public class OrderRequest
+    public class OrderUpdateRequest
     {
         public int UserId { get; set; }
+        public int OrderStatusId { get; set; }
         public List<OrderItem> OrderItems { get; set; }
     }
 }
