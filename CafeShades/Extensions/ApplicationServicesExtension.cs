@@ -23,10 +23,18 @@ namespace Cafeshades.Extensions
                 option.UseSqlServer(config.GetConnectionString("StoreDb"));
             });
 
-            var defaultApp = FirebaseApp.Create(new AppOptions()
+            try
             {
-                Credential = GoogleCredential.FromFile(Path.Combine(Directory.GetCurrentDirectory(), "firebase-adminsdk.json"))
-            });
+                var defaultApp = FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile("firebase-adminsdk.json")
+                });
+                Console.Write("Firebase Connected");
+            }catch(Exception ex)
+            {
+                Console.Write(ex);
+                Console.WriteLine(ex.StackTrace);
+            }
 
             return services;
         }

@@ -511,7 +511,7 @@ namespace CafeShades.Controllers
             if (!isNotificationSent)
                 return Ok(new { responseStatus = true, responseMessage = "Order Status changed successfully, Notification sent" });
 
-            return Ok(new { responseStatus = true, responseMessage = "Order Status changed successfully, Notification sent" });
+            return Ok(new { responseStatus = true, responseMessage = "Order Status changed successfull" });
         }
 
         private async Task<bool> SendOrderUpdateChangeNotification(string fcmToken, string notificationBody)
