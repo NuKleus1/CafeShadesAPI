@@ -102,7 +102,6 @@ namespace CafeShades.Controllers
                 Name = productRequest.productName,
                 ImageUrl = productRequest.productImage.FileName,
                 Price = productRequest.productPrice,
-                Quantity = productRequest.productQuantity,
                 CategoryId = productRequest.productCategoryId,
             };
 
@@ -173,7 +172,6 @@ namespace CafeShades.Controllers
                 Name = productRequest.productName,
                 ImageUrl = productRequest.productImage.FileName,
                 Price = productRequest.productPrice,
-                Quantity = productRequest.productQuantity,
                 CategoryId = productRequest.productCategoryId,
             };
 
@@ -226,29 +224,29 @@ namespace CafeShades.Controllers
             return Ok(new { responseStatus = true, responseMessage = "Product Updated Successfully !" });
         }
 
-        [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdateProductQuantity(int id, [FromForm] int productQuantity, [FromForm] int productPrice)
-        {
-            try
-            {
-                var product = await _productRepo.GetByIdAsync(id);
+        //[HttpPatch("{id}")]
+        //public async Task<IActionResult> UpdateProductQuantity(int id, [FromForm] int productQuantity, [FromForm] int productPrice)
+        //{
+        //    try
+        //    {
+        //        var product = await _productRepo.GetByIdAsync(id);
 
-                if (product == null)
-                    return NotFound(new { responseStatus = false, responseMessage = "Product Not Found!" });
+        //        if (product == null)
+        //            return NotFound(new { responseStatus = false, responseMessage = "Product Not Found!" });
 
-                product.Quantity = productQuantity;
-                product.Price = productPrice;
+        //        product.Quantity = productQuantity;
+        //        product.Price = productPrice;
 
-                _productRepo.Update(product);
-                _productRepo.SaveChanges();
+        //        _productRepo.Update(product);
+        //        _productRepo.SaveChanges();
 
-                return Ok(new { responseStatus = true, responseMessage = "Product Quantity Updated Successfully !" });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error Occurred while Updating Product Quantity");
-                return BadRequest(new { responseStatus = false, responseMessage = "Error while Updating Product Quantity!" });
-            }
-        }
+        //        return Ok(new { responseStatus = true, responseMessage = "Product Quantity Updated Successfully !" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error Occurred while Updating Product Quantity");
+        //        return BadRequest(new { responseStatus = false, responseMessage = "Error while Updating Product Quantity!" });
+        //    }
+        //}
     }
 }

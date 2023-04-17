@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Cafeshades.Models.Dtos;
+using CafeShades.Models.Dtos;
 using Core.Entities;
 
 namespace Cafeshades.Helper
@@ -12,11 +13,9 @@ namespace Cafeshades.Helper
                 .ForMember(dest => dest.productName, o => o.MapFrom(src => src.Name))
                 .ForMember(dest => dest.productId, o => o.MapFrom(src => src.Id))
                 .ForMember(dest => dest.productPrice, o => o.MapFrom(src => src.Price))
-                .ForMember(dest => dest.productQuantity, o => o.MapFrom(src => src.Quantity))
                 .ForMember(dest => dest.productImage, o => o.MapFrom<ProductImageUrlResolver>())
                 .ForMember(dest => dest.productCategoryId, o => o.MapFrom(src => src.CategoryId))
                 .ForMember(dest => dest.productCategory, o => o.MapFrom(src => src.Category.Name))
-                .ForMember(dest => dest.total, o => o.MapFrom(src => src.Price * src.Quantity))
                 .ReverseMap();
 
             CreateMap<OrderItem, ProductDto>()
@@ -27,10 +26,22 @@ namespace Cafeshades.Helper
                 .ForMember(dest => dest.productImage, o => o.MapFrom<ProductImageUrlFromOrderItem>())
                 .ForMember(dest => dest.productCategoryId, o => o.MapFrom(src => src.Product.CategoryId))
                 .ForMember(dest => dest.productCategory, o => o.MapFrom(src => src.Product.Category.Name))
-                .ForMember(dest => dest.total, o => o.MapFrom(src => src.Quantity * src.Product.Price))
+                .ReverseMap();
+
+            CreateMap<ProductDto, OrderItemDto>()
+                .ForMember(dest => dest.productName, o => o.MapFrom(src => src.productName))
+                .ForMember(dest => dest.productId, o => o.MapFrom(src => src.productId))
+                .ForMember(dest => dest.productPrice, o => o.MapFrom(src => src.productPrice))
+                .ForMember(dest => dest.productQuantity, o => o.MapFrom(src => src.productQuantity))
                 .ReverseMap();
 
 
+            CreateMap<OrderItem, OrderItemDto>()
+                .ForMember(dest => dest.productName, o => o.MapFrom(src => src.Product.Name))
+                .ForMember(dest => dest.productId, o => o.MapFrom(src => src.Product.Id))
+                .ForMember(dest => dest.productPrice, o => o.MapFrom(src => src.Product.Price))
+                .ForMember(dest => dest.productQuantity, o => o.MapFrom(src => src.Quantity))
+                .ReverseMap();
 
             CreateMap<Category, CategoryDto>()
                 .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.Id))

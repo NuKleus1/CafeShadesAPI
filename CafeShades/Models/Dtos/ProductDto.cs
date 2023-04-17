@@ -10,6 +10,5 @@ namespace Cafeshades.Models.Dtos
         public string productCategory{ get; set; }
         public int productCategoryId{ get; set; }
         public int productQuantity{ get; set; }
-        public int total{ get; set; }
     }
 }

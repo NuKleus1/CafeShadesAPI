@@ -2,57 +2,49 @@
   {
     "Name": "Burger",
     "ImageUrl": "Burger.png",
-    "Price": 10,
-    "Quantity": 1,
+    "Price": 10,    
     "CategoryId": 1
   },
   {
     "Name": "Pizza",
     "ImageUrl": "Pizza.png",
-    "Price": 15,
-    "Quantity": 1,
+    "Price": 15,    
     "CategoryId": 1
   },
   {
     "Name": "Pasta",
     "ImageUrl": "Pasta.png",
-    "Price": 12,
-    "Quantity": 1,
+    "Price": 12,    
     "CategoryId": 1
   },
   {
     "Name": "Rice",
     "ImageUrl": "Rice.png",
-    "Price": 8,
-    "Quantity": 1,
+    "Price": 8,    
     "CategoryId": 2
   },
   {
     "Name": "Noodles",
     "ImageUrl": "Noodles.png",
-    "Price": 10,
-    "Quantity": 1,
+    "Price": 10,    
     "CategoryId": 2
   },
   {
     "Name": "Sandwich",
     "ImageUrl": "Sandwich.png",
-    "Price": 6,
-    "Quantity": 1,
+    "Price": 6,    
     "CategoryId": 3
   },
   {
     "Name": "Hot Dog",
     "ImageUrl": "HotDog.png",
-    "Price": 5,
-    "Quantity": 1,
+    "Price": 5,    
     "CategoryId": 3
   },
   {
     "Name": "French Fries",
     "ImageUrl": "FrenchFries.png",
     "Price": 3,
-    "Quantity": 1,
     "CategoryId": 4
   }
 ]

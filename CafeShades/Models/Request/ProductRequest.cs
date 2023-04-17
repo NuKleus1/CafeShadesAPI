@@ -6,7 +6,6 @@ namespace CafeShades.Models.Request
         public string productName { get; set; }
         public IFormFile productImage { get; set; }
         public int productPrice { get; set; }
-        public int productQuantity { get; set; }
         public int productCategoryId { get; set; }
     }
 }
