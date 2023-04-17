@@ -4,6 +4,7 @@ using CafeShades.Models;
 using CafeShades.Models.Request;
 using Core.Entities;
 using Core.Interfaces;
+using FirebaseAdmin.Messaging;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -27,15 +28,20 @@ namespace CafeShades.Controllers
         private readonly IGenericRepository<OrderStatus> _orderStatusRepo;
         private readonly ILogger<OrderController> _logger;
         private readonly StoreDbContext _context;
+        private readonly IGenericRepository<UserToken> _userTokenRepo;
+        private readonly IConfiguration _config;
 
-        public OrderController(IMapper mapper,
-                               IGenericRepository<Order> orderRepo,
-                               IGenericRepository<OrderStatus> orderStatusRepo,
-                               ILogger<OrderController> logger,
+        public OrderController(
+            IMapper mapper,
+            IGenericRepository<Order> orderRepo,
+            IGenericRepository<OrderStatus> orderStatusRepo,
+            ILogger<OrderController> logger,
             IWebHostEnvironment env,
             IGenericRepository<Product> productRepo,
             IGenericRepository<User> userRepo,
-            StoreDbContext context)
+            StoreDbContext context,
+            IGenericRepository<UserToken> userTokenRepo,
+            IConfiguration config)
         {
             _mapper = mapper;
             _orderRepo = orderRepo;
@@ -45,6 +51,8 @@ namespace CafeShades.Controllers
             _productRepo = productRepo;
             _userRepo = userRepo;
             _context = context;
+            _userTokenRepo = userTokenRepo;
+            _config = config;
         }
 
         #region Order
@@ -64,7 +72,7 @@ namespace CafeShades.Controllers
                 if (record == null)
                     return NotFound(new ApiResponse("Order Not Found!"));
 
-                if (record != null && record.OrderItems != null)
+                if (record.OrderItems != null)
                 {
                     foreach (var item in record.OrderItems)
                     {
@@ -142,19 +150,18 @@ namespace CafeShades.Controllers
             return Ok(new { responseStatus = true, orderList = _mapper.Map<IReadOnlyList<OrderDto>>(record) });
         }
 
-
-        // TODO : Check This API
         // POST api/<OrderController>
         [HttpPost()]
         public async Task<IActionResult> AddOrder([FromBody] OrderRequest orderRequest)
         {
+            User user;
             try
             {
                 //var status = await _orderStatusRepo.GetByIdAsync(orderRequest.OrderStatusId);
                 //if (status == null)
                 //    return BadRequest(new ApiResponse("Status does not Exists !"));
 
-                User user = await _userRepo.GetByIdAsync(orderRequest.UserId);
+                user = await _userRepo.GetByIdAsync(orderRequest.UserId);
                 if (user == null)
                     return NotFound(new ApiResponse("User does not Exists !"));
 
@@ -162,7 +169,7 @@ namespace CafeShades.Controllers
                 {
                     var product = await _productRepo.GetByIdAsync(item.ProductId);
                     if (product == null)
-                        return NotFound(new ApiResponse("Product : " + product.Name + " Not Found!"));
+                        return NotFound(new ApiResponse("Product : " + item.ProductId + " Not Found!"));
                     //if (!(product.Quantity >= item.Quantity))
                     //    return BadRequest(new ApiResponse("Reduce Quantity for Product : " + product.Name));
                 }
@@ -187,7 +194,7 @@ namespace CafeShades.Controllers
                 newOrder.OrderItems.Add(new OrderItem
                 {
                     ProductId = item.ProductId,
-                    Quantity = item.Quantity,
+                    Quantity = item.ProductQuantity,
                 });
             try
             {
@@ -196,8 +203,20 @@ namespace CafeShades.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error Occurred while Deleting Order");
+                _logger.LogError(ex, "Error Occurred while Submitting Order");
                 return BadRequest(new ApiResponse("Unknown Server Error Occured"));
+            }
+
+            try
+            {
+                var isNotificationSent = await SendNewOrderNotification(user.Name);
+                //if(isNotificationSent)
+                //    return Ok(new { responseStatus = true, responseMessage = "Order submitted Successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Occurred while sending Notification for New Order");
+                //return Ok(new { responseStatus = true, responseMessage = "Order submitted Successfully, Notification Not Sent" });
             }
 
             return Ok(new { responseStatus = true, responseMessage = "Order submitted Successfully" });
@@ -205,33 +224,36 @@ namespace CafeShades.Controllers
 
         // PUT api/<OrderController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutOrder(int id, [FromBody] OrderUpdateRequest orderRequest)
+        public async Task<IActionResult> PutOrder(int id, [FromBody] OrderUpdateRequest orderUpdateRequest)
         {
-            var oldOrder = new Order();
-
+            Order oldOrder;
+            OrderStatus status;
             try
             {
-                oldOrder = await _orderRepo.GetByIdAsync(id);
+                oldOrder = await _orderRepo.GetByIdAsync(id, or => or.OrderItems);
 
-                if (oldOrder != null)
+                if (oldOrder.UserId != orderUpdateRequest.UserId)
+                    return Conflict(new ApiResponse("This order is not associated with the user"));
+
+                if (oldOrder == null)
                     return NotFound(new ApiResponse("Order Not Found!"));
 
-                var status = await _orderStatusRepo.GetByIdAsync(orderRequest.OrderStatusId);
+                status = await _orderStatusRepo.GetByIdAsync(orderUpdateRequest.OrderStatusId);
 
                 if (status == null)
                     return NotFound(new ApiResponse("Status does not Exists !"));
 
-                User user = await _userRepo.GetByIdAsync(orderRequest.UserId);
+                User user = await _userRepo.GetByIdAsync(orderUpdateRequest.UserId);
 
                 if (user == null)
                     return NotFound(new ApiResponse("User does not Exists !"));
 
-                foreach (var item in orderRequest.OrderItems)
+                foreach (var item in orderUpdateRequest.OrderItems)
                 {
                     var product = await _productRepo.GetByIdAsync(item.ProductId);
-                    
+
                     if (product == null)
-                        return NotFound(new ApiResponse("Product : " + item + " Not Found!"));
+                        return NotFound(new ApiResponse("Product : " + item.ProductId + " Not Found!"));
 
                     //if (!(product.Quantity >= item.Quantity))
                     //    return NotFound(new ApiResponse("Reduce Quantity for Product : " + product.Name + " | by : " + (item.Quantity - product.Quantity)));
@@ -243,37 +265,62 @@ namespace CafeShades.Controllers
                 return BadRequest(new ApiResponse("Unknown Server Error Occured"));
             }
 
-            Order newOrder = new Order
-            {
-                Id = id,
-                OrderStatusId = orderRequest.OrderStatusId,
-                UserId = orderRequest.UserId,
-                ModifiedAt = DateTime.UtcNow,
-                CreatedAt = oldOrder.CreatedAt,
-                Date = oldOrder.Date
-            };
+            //oldOrder = new Order
+            //{
+            //    Id = id,
+            //    OrderStatusId = orderUpdateRequest.OrderStatusId,
+            //    UserId = orderUpdateRequest.UserId,
+            //    ModifiedAt = DateTime.UtcNow,
+            //    CreatedAt = oldOrder.CreatedAt,
+            //    Date = oldOrder.Date
+            //};
 
-            newOrder.OrderItems = new List<OrderItem>();
 
-            foreach (var item in orderRequest.OrderItems)
-                newOrder.OrderItems.Add(new OrderItem
-                {
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity,
-                });
+            oldOrder.Id = id;
+            oldOrder.OrderStatusId = orderUpdateRequest.OrderStatusId;
+            oldOrder.UserId = orderUpdateRequest.UserId;
+            oldOrder.ModifiedAt = DateTime.UtcNow;
+            oldOrder.CreatedAt = oldOrder.CreatedAt;
+            oldOrder.Date = oldOrder.Date;
+
+            //oldOrder.OrderItems = new List<OrderItem>();
+
+            foreach (var item in oldOrder.OrderItems)
+                foreach (var itemRequest in orderUpdateRequest.OrderItems)
+                    item.Quantity = item.ProductId == itemRequest.ProductId ? itemRequest.ProductQuantity : item.Quantity;
+
 
             try
             {
-                _orderRepo.Update(newOrder);
+                //_orderRepo.Update(oldOrder);
                 _orderRepo.SaveChanges();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error Occurred while Deleting Order");
+                _logger.LogError(ex, "Error Occurred while Updatings Order");
                 return BadRequest(new ApiResponse("Unknown Server Error Occured"));
             }
 
-            return Ok(new { responseStatus = true, responseMessage = "Order submitted Successfully" });
+            try
+            {
+                
+                UserToken userToken = await _userTokenRepo.GetByIdAsync(oldOrder.UserId);
+                    
+                if (userToken == null) return Ok(new { responseStatus = true, responseMessage = "Order updated Successfully, Notification not sent" });
+
+                var isNotificationSent = await SendOrderUpdateChangeNotification(userToken.FcmToken, 
+                        status.Id != oldOrder.Id ? "There's a product update for your Order " : "The status of your order is updated to " + status.StatusName
+                    );
+                
+                if (isNotificationSent) return Ok(new { responseStatus = true, responseMessage = "Order updated Successfully, Notification Sent" });
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error Occurred while Sending Notification");
+                return BadRequest(new ApiResponse("Unknown Server Error Occured"));
+            }
+
+            return Ok(new { responseStatus = true, responseMessage = "Order updated Successfully" });
         }
 
         // DELETE api/<OrderController>/5
@@ -386,19 +433,13 @@ namespace CafeShades.Controllers
         [HttpPut("status/{id}")]
         public async Task<IActionResult> PutOrderStatus(int id, [FromBody] string orderStatusName)
         {
-            OrderStatus status = new OrderStatus
-            {
-                Id = id,
-                StatusName = orderStatusName
-            };
-
             try
             {
                 var statusRepo = await _orderStatusRepo.GetByIdAsync(id);
 
                 if (statusRepo == null) return NotFound(new ApiResponse("Status Not Found!"));
 
-                _orderStatusRepo.Update(status);
+                statusRepo.StatusName = orderStatusName;
                 _orderStatusRepo.SaveChanges();
             }
             catch (Exception ex)
@@ -431,6 +472,119 @@ namespace CafeShades.Controllers
         }
 
         #endregion
+
+        [HttpPost("{orderId}/changeOrderStatus/{statusId}")]
+        public async Task<IActionResult> ChangeOrderStatus(int orderId, int statusId)
+        {
+            Order record;
+            OrderStatus status;
+            try
+            {
+                record = await _orderRepo.GetByIdAsync(orderId, new List<Expression<Func<Order, object>>>
+                {
+                    or => or.OrderStatus,
+                    or => or.OrderItems,
+                });
+
+                if (record == null) return NotFound(new ApiResponse("Order Not Found!"));
+
+                status = await _orderStatusRepo.GetByIdAsync(statusId);
+
+                if (status == null) return NotFound(new ApiResponse("Status Not Found!"));
+
+                record.OrderStatusId = statusId;
+                _orderRepo.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Occurred while sending notification!");
+                return BadRequest(new ApiResponse("Error Occurred!"));
+            }
+
+            var userToken = await _userTokenRepo.GetByIdAsync(usrtoken => usrtoken.UserId == record.UserId);
+
+            if (userToken == null)
+                return Ok(new { responseStatus = true, responseMessage = "Order Status changed successfully, Notification not sent!" }); ;
+
+            var isNotificationSent = await SendOrderUpdateChangeNotification(userToken.FcmToken, "The status of your order is updated to " + status.StatusName);
+
+            if (!isNotificationSent)
+                return Ok(new { responseStatus = true, responseMessage = "Order Status changed successfully, Notification sent" });
+
+            return Ok(new { responseStatus = true, responseMessage = "Order Status changed successfully, Notification sent" });
+        }
+
+        private async Task<bool> SendOrderUpdateChangeNotification(string fcmToken, string notificationBody)
+        {
+
+            var message = new Message()
+            {
+                Notification = new Notification
+                {
+                    Title = "Here's an Update",
+                    Body = notificationBody,
+                },
+                Token = fcmToken
+            };
+
+            string result;
+
+            try
+            {
+                var messaging = FirebaseMessaging.DefaultInstance;
+                result = await messaging.SendAsync(message);
+                if (result == null)
+                    return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Occurred while sending notification!");
+            }
+
+            _logger.LogInformation("Notification Sent to FCM : " + fcmToken);
+
+            return true;
+
+        }
+
+        private async Task<bool> SendNewOrderNotification(string userName)
+        {
+            int adminId = int.Parse(_config["AdminId"]);
+
+            var userToken = await _userTokenRepo.GetByIdAsync(uT => uT.UserId == adminId);
+
+            if (userToken == null)
+                return false;
+
+            var message = new Message()
+            {
+                Notification = new Notification
+                {
+                    Title = "Order Recieved",
+                    Body = "Received an Order from " + userName,
+                },
+                Token = userToken.FcmToken
+            };
+
+            string result;
+
+            try
+            {
+                var messaging = FirebaseMessaging.DefaultInstance;
+                result = await messaging.SendAsync(message);
+                if (result == null)
+                    return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Occurred while sending notification!");
+            }
+
+            _logger.LogInformation("Notification Sent to FCM : " + userToken.FcmToken);
+
+            return true;
+
+        }
 
     }
 }

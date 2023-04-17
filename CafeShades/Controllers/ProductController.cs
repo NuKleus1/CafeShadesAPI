@@ -55,7 +55,7 @@ namespace CafeShades.Controllers
             Product product;
             try
             {
-                product = await _productRepo.GetByIdAsync(id);
+                product = await _productRepo.GetByIdAsync(id, pro => pro.Category);
 
                 if (product == null)
                     return NotFound(new { responseStatus = false, responseMessage = "Product Not Found!" });
@@ -77,7 +77,7 @@ namespace CafeShades.Controllers
             IEnumerable<Product> products;
             try
             {
-                products = await _productRepo.ListAllAsync();
+                products = await _productRepo.ListAllAsync(pro => pro.Category);
 
                 if (products.IsNullOrEmpty())
                     return NotFound(new { responseStatus = false, responseMessage = "Products Not found!" });
@@ -95,7 +95,7 @@ namespace CafeShades.Controllers
         }
 
         [HttpPost()]
-        public async Task<IActionResult> AddProduct([FromBody] ProductRequest productRequest)
+        public async Task<IActionResult> AddProduct([FromForm] ProductRequest productRequest)
         {
             Product product = new Product
             {
@@ -163,29 +163,19 @@ namespace CafeShades.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct(int id, [FromBody] ProductRequest productRequest)
         {
+            Product oldProduct = await _productRepo.GetByIdAsync(id);
+
+            if (oldProduct == null)
+                return NotFound(new { responseStatus = false, responseMessage = "Product Not found!" });
+
             if (productRequest.productImage == null || productRequest.productImage.Length <= 0)
                 return BadRequest(new { responseStatus = false, responseMessage = "No image file was provided." });
 
-            Product newProduct = new Product
-            {
-                Id = id,
-                Name = productRequest.productName,
-                ImageUrl = productRequest.productImage.FileName,
-                Price = productRequest.productPrice,
-                CategoryId = productRequest.productCategoryId,
-            };
-
-            var category = await _categoryRepository.GetByIdAsync(newProduct.CategoryId);
+           var category = await _categoryRepository.GetByIdAsync(oldProduct.CategoryId);
 
             if (category == null)
                 return UnprocessableEntity(new { responseStatus = false, responseMessage = "Category does not Exist !" });
-
             
-            Product oldProduct = await _productRepo.GetByIdAsync(id);
-            
-            if (oldProduct == null)
-                return NotFound(new {responseStatus = false, responseMessage = "Product Not found!"});
-
             string oldImagePath = Path.Combine(_env.WebRootPath, "Product", oldProduct.ImageUrl);
 
             string newImageFileName;
@@ -206,13 +196,18 @@ namespace CafeShades.Controllers
                 _logger.LogError(ex, "Error while saving Product Image");
                 return BadRequest(new { responseStatus = false, responseMessage = "Error while saving Image!" });
             }
-
+            
+            oldProduct.Name = productRequest.productName;
+            oldProduct.ImageUrl = newImageFileName;
+            oldProduct.Price = productRequest.productPrice;
+            oldProduct.CategoryId = productRequest.productCategoryId;
+            
             try
             {
-                _productRepo.Update(newProduct);
+                //_productRepo.Update(newProduct);
                 _productRepo.SaveChanges();
 
-                System.IO.File.Replace(oldImagePath, newImageFilePath, newProduct.Id + "_" + newProduct.Name);
+                System.IO.File.Replace(oldImagePath, newImageFilePath, oldProduct.Id + "_" + oldProduct.Name);
 
             }
             catch (Exception ex)

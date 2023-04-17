@@ -8,6 +8,6 @@ namespace CafeShades.Models.Request
     public class OrderRequest
     {
         public int UserId { get; set; }
-        public List<OrderItem> OrderItems { get; set; }
+        public List<OrderItemRequest> OrderItems { get; set; }
     }
 }

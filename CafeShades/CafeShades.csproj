@@ -7,7 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="firebase-adminsdk.json" />
+  </ItemGroup>
+	
+<ItemGroup>
+  <None Update="firebase-adminsdk.json">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="FirebaseAdmin" Version="2.3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.5">
       <PrivateAssets>all</PrivateAssets>
@@ -25,6 +36,10 @@
     <Folder Include="wwwRoot\common\" />
     <Folder Include="wwwRoot\Category\" />
     <Folder Include="wwwRoot\Product\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="firebase-adminsdk.json" />
   </ItemGroup>
 
 </Project>

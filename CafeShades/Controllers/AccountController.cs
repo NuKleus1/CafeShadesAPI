@@ -5,6 +5,7 @@ using CafeShades.Models;
 using Core.Entities;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CafeShades.Controllers
 {
@@ -28,7 +29,26 @@ namespace CafeShades.Controllers
             _userTokenRepo = userTokenRepo;
         }
 
-        [HttpGet("user")]
+
+        [HttpGet("getAllUsers")]
+        public async Task<IActionResult> GetAllUsers() 
+        {
+            IReadOnlyList<User> user;
+            try
+            {
+                user = await _userRepo.ListAllAsync();
+                if (user.IsNullOrEmpty())
+                    return NotFound(new ApiResponse("User Not Found"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Occurred while Retrieving Users ");
+                return BadRequest(new ApiResponse("Error Occurred"));
+            }
+
+            return Ok(new { responseStatus = true, user = user });
+        }
+        [HttpPost("user")]
         public async Task<IActionResult> GetUserbyPhoneNumber([FromBody] string phoneNumber)
         {
             if (String.IsNullOrEmpty(phoneNumber))
@@ -48,7 +68,7 @@ namespace CafeShades.Controllers
                 return BadRequest(new ApiResponse("Error Occurred"));
             }
 
-            return Ok(new { responseStatus = true, user = _mapper.Map<UserRequest>(user) });
+            return Ok(new { responseStatus = true, user = _mapper.Map<UserDto>(user) });
         }
 
         [HttpGet("user/{id}")]
@@ -68,7 +88,7 @@ namespace CafeShades.Controllers
                 return BadRequest(new ApiResponse("Error Occurred"));
             }
 
-            return Ok(new { responseStatus = true, user = _mapper.Map<UserRequest>(user) });
+            return Ok(new { responseStatus = true, user = _mapper.Map<User>(user) });
         }
 
         [HttpPost("login")]
@@ -89,7 +109,7 @@ namespace CafeShades.Controllers
 
                 _userRepo.SaveChanges();
 
-                return Ok(new { responseStatus = true, user = user });
+                return Ok(new { responseStatus = true, user = _mapper.Map<User>(user) });
 
             }
             catch (Exception ex)
@@ -99,17 +119,17 @@ namespace CafeShades.Controllers
             }
         }
 
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout([FromBody] string mobileNumber)
+        [HttpGet("logout/{id}")]
+        public async Task<IActionResult> Logout(int id)
         {
             try
             {
-                var user = await _userRepo.GetByIdAsync(user => string.Equals(user.MobileNumber, mobileNumber));
+                var user = await _userRepo.GetByIdAsync(id);
 
                 if (user == null)
                     return Unauthorized(new ApiResponse("User Not Found"));
 
-                if (user.isLoggedIn)
+                if (!user.isLoggedIn)
                     return Conflict(new ApiResponse("User Not Logged In"));
 
                 user.isLoggedIn = false;
@@ -146,9 +166,9 @@ namespace CafeShades.Controllers
                 if (checkUser != null)
                     return Conflict(new ApiResponse("Phone Number is already registerd !"));
 
+                _userRepo.Add(user);
                 user.isLoggedIn = true;
                 user.LastLoginAt = DateTime.UtcNow;
-                _userRepo.Add(user);
                 _userRepo.SaveChanges();
             }
             catch (Exception ex)
@@ -157,8 +177,48 @@ namespace CafeShades.Controllers
                 return BadRequest(new ApiResponse("Error Occurred"));
             }
 
-            return Ok(new { responseStatus = true, user = _mapper.Map<UserRequest>(user) });
+            return Ok(new { responseStatus = true, user = _mapper.Map<UserDto>(user) });
         }
+
+        [HttpPost("update/{id}")]
+        public async Task<IActionResult> UpdateProfile(int id, [FromBody] UserRequest userRequest)
+        {
+            User user = new User
+            {
+                Id = id,
+                Name = userRequest.name,
+                BuildingName = userRequest.buildingName,
+                FloorNumber = userRequest.floorNumber,
+                Landmark = userRequest.landmark,
+                MobileNumber = userRequest.mobileNumber,
+                OfficeNumber = userRequest.officeNumber,
+            };
+
+            try
+            {
+                var checkUser = await _userRepo.GetByIdAsync(user => string.Equals(user.MobileNumber, userRequest.mobileNumber));
+
+                if (checkUser == null)
+                    return NotFound(new ApiResponse("User Not Found !"));
+
+                checkUser.Name = userRequest.name;
+                checkUser.BuildingName = userRequest.buildingName;
+                checkUser.FloorNumber = userRequest.floorNumber;
+                checkUser.Landmark = userRequest.landmark;
+                checkUser.MobileNumber = userRequest.mobileNumber;
+                checkUser.OfficeNumber = userRequest.officeNumber;
+
+                _userRepo.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Occurred while sign up");
+                return BadRequest(new ApiResponse("Error Occurred"));
+            }
+
+            return Ok(new { responseStatus = true, user = _mapper.Map<UserDto>(user) });
+        }
+
 
         [HttpPost("user/token/{id}")]
         public async Task<IActionResult> AddFcmToken(int id, [FromBody] string fcmToken)
@@ -173,17 +233,22 @@ namespace CafeShades.Controllers
 
                 var userToken = await _userTokenRepo.GetByIdAsync(ut => ut.UserId == id);
 
-                if (userToken == null)
+                if (userToken != null)
                 {
                     userToken.FcmToken = fcmToken;
-                    _userTokenRepo.Update(userToken);
                 }
                 else
                 {
-                    userToken.FcmToken = fcmToken;
-                    _userTokenRepo.Add(userToken);
+                    UserToken newUserToken = new UserToken
+                    {
+                        UserId = id,
+                        FcmToken = fcmToken
+                    };
+
+                    _userTokenRepo.Add(newUserToken);
                 }
                 _userTokenRepo.SaveChanges();
+
                 return Ok(new { responseStatus = true, responseMessage = "Fcm Token Added !" });
 
             }
@@ -193,5 +258,7 @@ namespace CafeShades.Controllers
                 return BadRequest(new ApiResponse("Error Occurred"));
             }
         }
+
+
     }
 }

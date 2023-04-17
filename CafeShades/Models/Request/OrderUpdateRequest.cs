@@ -7,6 +7,6 @@ namespace CafeShades.Models.Request
     {
         public int UserId { get; set; }
         public int OrderStatusId { get; set; }
-        public List<OrderItem> OrderItems { get; set; }
+        public List<OrderItemRequest> OrderItems { get; set; }
     }
 }

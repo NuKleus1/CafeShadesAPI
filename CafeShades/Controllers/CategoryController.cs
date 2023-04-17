@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Cafeshades.Models.Dtos;
 using Cafeshades.Models.Request;
+using CafeShades.Models;
 using Core.Entities;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -20,17 +21,20 @@ namespace CafeShades.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly IGenericRepository<Category> _categoryRepo;
         private readonly ILogger<CategoryController> _logger;
+        private readonly IGenericRepository<Product> _productRepo;
 
         public CategoryController(
             IMapper mapper,
-            IGenericRepository<Category> productRepo,
+            IGenericRepository<Category> categoryRepo,
             ILogger<CategoryController> logger,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            IGenericRepository<Product> productRepo)
         {
             _mapper = mapper;
-            _categoryRepo = productRepo;
+            _categoryRepo = categoryRepo;
             _logger = logger;
             _env = env;
+            _productRepo = productRepo;
         }
 
 
@@ -76,8 +80,15 @@ namespace CafeShades.Controllers
 
         // POST api/<CategoryController>
         [HttpPost()]
-        public IActionResult AddCategory([FromForm] CategoryRequest category)
+        public async Task<IActionResult> AddCategory([FromForm] CategoryRequest category)
         {
+            var cat = await _categoryRepo.ListAllAsync();
+
+
+            foreach (var item in cat)
+                if (item.Name.Equals(category.CategoryName))
+                    return Conflict(new ApiResponse("Category Exists!"));
+
 
             if (category.ImageFile == null || category.ImageFile.Length <= 0)
                 return BadRequest(new { responseStatus = false, responseMessage = "No image file was provided." });
@@ -160,15 +171,15 @@ namespace CafeShades.Controllers
 
             try
             {
-                Category newCategory = new Category();
-                newCategory.Id = id;
-                newCategory.Name = category.CategoryName;
-                newCategory.ImageUrl = newImageFileName;
 
-                _categoryRepo.Update(newCategory);
+                cat.Id = id;
+                cat.Name = category.CategoryName;
+                cat.ImageUrl = newImageFileName;
+
+                //_categoryRepo.Update(newCategory);
                 _categoryRepo.SaveChanges();
 
-                System.IO.File.Replace(oldImagePath, newImageFilePath, newCategory.Id + "_" + category.CategoryName);
+                System.IO.File.Replace(oldImagePath, newImageFilePath, cat.Id + "_" + category.CategoryName);
 
             }
             catch (DBConcurrencyException ex)
@@ -198,6 +209,10 @@ namespace CafeShades.Controllers
                 var record = await _categoryRepo.GetByIdAsync(id);
 
                 if (record == null) return NotFound(new { responseStatus = false, responseMessage = "Category Not Found!" });
+
+                var products = await _productRepo.ListAllAsync(pro => pro.CategoryId == id);
+
+                if (record == null) return NotFound(new { responseStatus = false, responseMessage = "There Exists a Product with this category!" });
 
                 _categoryRepo.Delete(record);
                 _categoryRepo.SaveChanges();
