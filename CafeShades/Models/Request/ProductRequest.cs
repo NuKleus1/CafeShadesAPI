@@ -1,4 +1,5 @@
-﻿namespace CafeShades.Models.Request
+﻿#nullable disable
+namespace CafeShades.Models.Request
 {
     public class ProductRequest
     {

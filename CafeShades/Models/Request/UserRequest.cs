@@ -1,4 +1,5 @@
-﻿namespace Cafeshades.Models.Dtos.Request
+﻿#nullable disable
+namespace Cafeshades.Models.Dtos.Request
 {
     public class UserRequest
     {

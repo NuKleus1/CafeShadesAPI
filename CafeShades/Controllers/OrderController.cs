@@ -163,8 +163,8 @@ namespace CafeShades.Controllers
                     var product = await _productRepo.GetByIdAsync(item.ProductId);
                     if (product == null)
                         return NotFound(new ApiResponse("Product : " + product.Name + " Not Found!"));
-                    if (!(product.Quantity >= item.Quantity))
-                        return BadRequest(new ApiResponse("Reduce Quantity for Product : " + product.Name));
+                    //if (!(product.Quantity >= item.Quantity))
+                    //    return BadRequest(new ApiResponse("Reduce Quantity for Product : " + product.Name));
                 }
             }
             catch (Exception ex)

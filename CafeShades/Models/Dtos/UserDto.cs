@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
+﻿#nullable disable
 namespace Cafeshades.Models.Dtos
 {
     public class UserDto

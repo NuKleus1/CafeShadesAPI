@@ -1,4 +1,5 @@
-﻿using Core.Entities;
+﻿#nullable disable
+using Core.Entities;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 

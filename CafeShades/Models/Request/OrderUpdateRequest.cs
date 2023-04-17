@@ -1,4 +1,5 @@
-﻿using Core.Entities;
+﻿#nullable disable
+using Core.Entities;
 
 namespace CafeShades.Models.Request
 {

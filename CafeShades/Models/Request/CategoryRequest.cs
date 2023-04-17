@@ -1,4 +1,5 @@
-﻿namespace Cafeshades.Models.Request
+﻿#nullable disable
+namespace Cafeshades.Models.Request
 {
     public class CategoryRequest
     {
