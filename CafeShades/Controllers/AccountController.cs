@@ -177,7 +177,7 @@ namespace CafeShades.Controllers
                 return BadRequest(new ApiResponse("Error Occurred"));
             }
 
-            return Ok(new { responseStatus = true, responseMessage = "Sign up successfull" });
+            return Ok(new { responseStatus = true, user =_mapper.Map<UserDto>(user) });
         }
 
         [HttpPost("update/{id}")]
