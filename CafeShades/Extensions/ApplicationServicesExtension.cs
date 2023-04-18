@@ -27,7 +27,7 @@ namespace Cafeshades.Extensions
             {
                 var defaultApp = FirebaseApp.Create(new AppOptions()
                 {
-                    Credential = GoogleCredential.FromFile("firebase-adminsdk.json")
+                    Credential = GoogleCredential.FromFile("firebase-key.json")
                 });
                 Console.Write("Firebase Connected");
             }catch(Exception ex)
