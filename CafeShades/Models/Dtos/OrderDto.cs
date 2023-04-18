@@ -8,7 +8,6 @@ namespace Cafeshades.Models.Dtos
     {
         public int userId { get; set; }
         public int orderId { get; set; }
-        
         public string orderStatus { get; set; }
         
         public DateTime orderDate { get; set; }

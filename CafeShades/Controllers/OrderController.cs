@@ -147,7 +147,19 @@ namespace CafeShades.Controllers
 
             if (record.IsNullOrEmpty()) return NotFound(new ApiResponse("Orders Not Found!"));
 
-            return Ok(new { responseStatus = true, orderList = _mapper.Map<IReadOnlyList<OrderDto>>(record) });
+            var data = _mapper.Map<IReadOnlyList<OrderDto>>(record);
+
+            foreach (var order in data) { 
+                var sum = 0;
+                foreach (var item in order.productList)
+                {
+                    if (item != null) sum += item.productPrice * item.productQuantity;
+                }
+                order.totalAmount = sum;
+            }
+
+
+            return Ok(new { responseStatus = true, orderList =  data});
         }
 
         // POST api/<OrderController>
@@ -511,7 +523,7 @@ namespace CafeShades.Controllers
             if (!isNotificationSent)
                 return Ok(new { responseStatus = true, responseMessage = "Order Status changed successfully, Notification sent" });
 
-            return Ok(new { responseStatus = true, responseMessage = "Order Status changed successfull" });
+            return Ok(new { responseStatus = true, responseMessage = "Order Status changed successfully" });
         }
 
         private async Task<bool> SendOrderUpdateChangeNotification(string fcmToken, string notificationBody)
@@ -535,13 +547,15 @@ namespace CafeShades.Controllers
                 result = await messaging.SendAsync(message);
                 if (result == null)
                     return false;
+
+                _logger.LogInformation("Notification Sent to FCM : " + fcmToken);
+
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error Occurred while sending notification!");
             }
 
-            _logger.LogInformation("Notification Sent to FCM : " + fcmToken);
 
             return true;
 

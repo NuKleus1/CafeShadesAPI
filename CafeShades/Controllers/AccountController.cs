@@ -101,7 +101,7 @@ namespace CafeShades.Controllers
                 if (user == null)
                     return Unauthorized(new ApiResponse("User Not Found"));
 
-                if (!user.isLoggedIn)
+                if (user.isLoggedIn)
                     return Conflict(new ApiResponse("Already Logged In"));
 
                 user.isLoggedIn = true;
@@ -109,7 +109,7 @@ namespace CafeShades.Controllers
 
                 _userRepo.SaveChanges();
 
-                return Ok(new { responseStatus = true, user = _mapper.Map<User>(user) });
+                return Ok(new { responseStatus = true, resonseMessage = "Login successfull" });
 
             }
             catch (Exception ex)
@@ -136,7 +136,7 @@ namespace CafeShades.Controllers
 
                 _userRepo.SaveChanges();
 
-                return Ok(new { responseStatus = true, responseMessage = "User logged out" });
+                return Ok(new { responseStatus = true, responseMessage = "Log out successfull" });
 
             }
             catch (Exception ex)
@@ -177,7 +177,7 @@ namespace CafeShades.Controllers
                 return BadRequest(new ApiResponse("Error Occurred"));
             }
 
-            return Ok(new { responseStatus = true, user = _mapper.Map<UserDto>(user) });
+            return Ok(new { responseStatus = true, responseMessage = "Sign up successfull" });
         }
 
         [HttpPost("update/{id}")]
@@ -258,7 +258,5 @@ namespace CafeShades.Controllers
                 return BadRequest(new ApiResponse("Error Occurred"));
             }
         }
-
-
     }
 }
