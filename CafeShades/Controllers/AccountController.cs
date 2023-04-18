@@ -216,7 +216,7 @@ namespace CafeShades.Controllers
                 return BadRequest(new ApiResponse("Error Occurred"));
             }
 
-            return Ok(new { responseStatus = true, user = _mapper.Map<UserDto>(user) });
+            return Ok(new { responseStatus = true,responseMessage = "User profile Updated successfully!" });
         }
 
 
