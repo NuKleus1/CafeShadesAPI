@@ -244,6 +244,8 @@ namespace CafeShades.Controllers
             {
                 oldOrder = await _orderRepo.GetByIdAsync(id, or => or.OrderItems);
 
+                if (oldOrder == null)
+                    return NotFound(new ApiResponse("Order Not Found!"));
                 if (oldOrder.UserId != orderUpdateRequest.UserId)
                     return Conflict(new ApiResponse("This order is not associated with the user"));
 
