@@ -474,8 +474,8 @@ namespace CafeShades.Controllers
 
                 if (record == null) return NotFound(new ApiResponse("Status Not Found!"));
 
-                _orderStatus.Delete(record);
-                _orderStatus.SaveChanges();
+                _orderStatusRepo.Delete(record);
+                _orderStatusRepo.SaveChanges();
             }
             catch (Exception ex)
             {
