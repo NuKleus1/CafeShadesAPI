@@ -470,12 +470,12 @@ namespace CafeShades.Controllers
         {
             try
             {
-                var record = await _orderRepo.GetByIdAsync(id);
+                var record = await _orderStatusRepo.GetByIdAsync(id);
 
                 if (record == null) return NotFound(new ApiResponse("Status Not Found!"));
 
-                _orderRepo.Delete(record);
-                _orderRepo.SaveChanges();
+                _orderStatus.Delete(record);
+                _orderStatus.SaveChanges();
             }
             catch (Exception ex)
             {
