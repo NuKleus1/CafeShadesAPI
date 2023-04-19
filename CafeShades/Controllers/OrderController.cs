@@ -318,7 +318,7 @@ namespace CafeShades.Controllers
             try
             {
                 
-                UserToken userToken = await _userTokenRepo.GetByIdAsync(oldOrder.UserId);
+                UserToken userToken = await _userTokenRepo.GetByIdAsync(ut => ut.UserId == oldOrder.UserId);
                     
                 if (userToken == null) return Ok(new { responseStatus = true, responseMessage = "Order updated Successfully, Notification not sent" });
 
