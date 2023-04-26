@@ -81,6 +81,11 @@ namespace CafeShades.Controllers
 
                 if (user == null)
                     return NotFound(new ApiResponse("User Not Found"));
+                
+                user.isLoggedIn = true;
+                user.LastLoginAt = DateTime.UtcNow;
+                _userRepo.SaveChanges();
+                
             }
             catch (Exception ex)
             {
