@@ -61,6 +61,10 @@ namespace CafeShades.Controllers
 
                 if (user == null)
                     return NotFound(new ApiResponse("User Not Found"));
+                
+                user.isLoggedIn = true;
+                user.LastLoginAt = DateTime.UtcNow;
+                _userRepo.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -80,12 +84,7 @@ namespace CafeShades.Controllers
                 user = await _userRepo.GetByIdAsync(id);
 
                 if (user == null)
-                    return NotFound(new ApiResponse("User Not Found"));
-                
-                user.isLoggedIn = true;
-                user.LastLoginAt = DateTime.UtcNow;
-                _userRepo.SaveChanges();
-                
+                    return NotFound(new ApiResponse("User Not Found"));                
             }
             catch (Exception ex)
             {
