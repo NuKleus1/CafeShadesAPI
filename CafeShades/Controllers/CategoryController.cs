@@ -212,7 +212,7 @@ namespace CafeShades.Controllers
 
                 var products = await _productRepo.ListAllAsync(pro => pro.CategoryId == id);
 
-                if (products != null) return NotFound(new { responseStatus = false, responseMessage = "There Exists a Product with this category!" });
+                if (!products.IsNullOrEmpty()) return NotFound(new { responseStatus = false, responseMessage = "There Exists a Product with this category!" });
 
                 _categoryRepo.Delete(record);
                 _categoryRepo.SaveChanges();
