@@ -113,7 +113,7 @@ namespace CafeShades.Controllers
             try
             {
                 string fileName = Guid.NewGuid().ToString() + Path.GetExtension(productRequest.productImage.FileName);
-
+                product.ImageUrl = fileName
                 string filePath = Path.Combine(_env.WebRootPath, "Product", fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
