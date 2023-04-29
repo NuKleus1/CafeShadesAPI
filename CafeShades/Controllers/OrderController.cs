@@ -323,7 +323,7 @@ namespace CafeShades.Controllers
                 if (userToken == null) return Ok(new { responseStatus = true, responseMessage = "Order updated Successfully, Notification not sent" });
 
                 var isNotificationSent = await SendOrderUpdateChangeNotification(userToken.FcmToken, 
-                        oldStatus.Id == oldOrder.OrderStatusId ? "There's a product update for your Order " : "The status of your order is updated to " + status.StatusName
+                        oldStatusId == oldOrder.OrderStatusId ? "There's a product update for your Order " : "The status of your order is updated to " + status.StatusName
                     );
                 
                 if (isNotificationSent) return Ok(new { responseStatus = true, responseMessage = "Order updated Successfully, Notification Sent" });
