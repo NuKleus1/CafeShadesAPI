@@ -240,6 +240,7 @@ namespace CafeShades.Controllers
         {
             Order oldOrder;
             OrderStatus status;
+            int oldStatusId;
             try
             {
                 oldOrder = await _orderRepo.GetByIdAsync(id, or => or.OrderItems);
@@ -248,9 +249,8 @@ namespace CafeShades.Controllers
                     return NotFound(new ApiResponse("Order Not Found!"));
                 if (oldOrder.UserId != orderUpdateRequest.UserId)
                     return Conflict(new ApiResponse("This order is not associated with the user"));
-
-                if (oldOrder == null)
-                    return NotFound(new ApiResponse("Order Not Found!"));
+                    
+                oldStatusId = oldOrder.OrderStatusId ;
 
                 status = await _orderStatusRepo.GetByIdAsync(orderUpdateRequest.OrderStatusId);
 
@@ -323,7 +323,7 @@ namespace CafeShades.Controllers
                 if (userToken == null) return Ok(new { responseStatus = true, responseMessage = "Order updated Successfully, Notification not sent" });
 
                 var isNotificationSent = await SendOrderUpdateChangeNotification(userToken.FcmToken, 
-                        status.Id != oldOrder.OrderStatusId ? "There's a product update for your Order " : "The status of your order is updated to " + status.StatusName
+                        oldStatus.Id == oldOrder.OrderStatusId ? "There's a product update for your Order " : "The status of your order is updated to " + status.StatusName
                     );
                 
                 if (isNotificationSent) return Ok(new { responseStatus = true, responseMessage = "Order updated Successfully, Notification Sent" });
